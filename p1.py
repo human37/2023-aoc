@@ -62,4 +62,10 @@ def p2():
     return calibration_sum
 
 
-print(p2())
+def main():
+    print("calibration sum p1: ", p1())
+    print("calibration sum p2: ", p2())
+
+
+if __name__ == "__main__":
+    main()
