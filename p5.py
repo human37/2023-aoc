@@ -74,8 +74,13 @@ def p1():
     return min(locations)
 
 
+def p2():
+    pass
+
+
 def main():
     print("lowest location number: ", p1())
+    print("lowest location number for the seed ranges: ", p2())
 
 
 if __name__ == "__main__":
