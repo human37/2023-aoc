@@ -51,7 +51,6 @@ func main() {
 	distances = regex.Split(string(distance), -1)[1:]
 
 	// Part 1
-
 	numWaysToWin := 1
 	for i := 0; i < len(times); i++ {
 		totalTime, err := strconv.Atoi(times[i])
@@ -67,7 +66,6 @@ func main() {
 	fmt.Printf("number of ways to win product: %d\n", numWaysToWin)
 
 	// Part 2
-
 	totalTime := ""
 	for i := 0; i < len(times); i++ {
 		totalTime += times[i]
