@@ -54,6 +54,17 @@ def find_destination(seed, mappings, current):
     return dest
 
 
+def find_source(seed, mappings, current):
+    source = 0
+    for key, value in mappings[current].items():
+        if in_range(seed, value):
+            source = seed - value[0] + key[0]
+            break
+        else:
+            source = seed
+    return source
+
+
 def find_location(seed, mappings):
     soil_num = find_destination(seed, mappings, "seeds_to_soil")
     fertilizer_num = find_destination(soil_num, mappings, "soil_to_fertilizer")
@@ -63,6 +74,17 @@ def find_location(seed, mappings):
     humidity_num = find_destination(temp_num, mappings, "temperature_to_humidity")
     location_num = find_destination(humidity_num, mappings, "humidity_to_location")
     return location_num
+
+
+def find_seed(location, mappings):
+    humidity_num = find_source(location, mappings, "humidity_to_location")
+    temp_num = find_source(humidity_num, mappings, "temperature_to_humidity")
+    light_num = find_source(temp_num, mappings, "light_to_temperature")
+    water_num = find_source(light_num, mappings, "water_to_light")
+    fertilizer_num = find_source(water_num, mappings, "fertilizer_to_water")
+    soil_num = find_source(fertilizer_num, mappings, "soil_to_fertilizer")
+    seed_num = find_source(soil_num, mappings, "seeds_to_soil")
+    return seed_num
 
 
 def p1():
@@ -75,12 +97,27 @@ def p1():
 
 
 def p2():
-    pass
+    seeds_list, seed_mappings = read_input()
+    seeds_ranges = []
+    for i in range(0, len(seeds_list), 2):
+        start_seed = seeds_list[i]
+        end_seed = seeds_list[i] + seeds_list[i + 1] - 1
+        seeds_ranges.append((start_seed, end_seed))
+    current_location = 0
+    found_seed = False
+    while not found_seed:
+        current_location += 1
+        seed = find_seed(current_location, seed_mappings)
+        for seed_range in seeds_ranges:
+            if in_range(seed, seed_range):
+                found_seed = True
+                break
+    return current_location
 
 
 def main():
-    print("lowest location number: ", p1())
-    print("lowest location number for the seed ranges: ", p2())
+    print("part 1 - lowest location number: ", p1())
+    print("part 2 - lowest location number: ", p2())
 
 
 if __name__ == "__main__":
