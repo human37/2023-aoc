@@ -3,6 +3,12 @@ import { readFileSync } from "fs";
 let instructions = [];
 const network = {};
 
+const gcd = (a, b) => (b == 0 ? a : gcd(b, a % b));
+
+const lcm = (a, b) => (a / gcd(a, b)) * b;
+
+const lcmAll = (ns) => ns.reduce(lcm, 1);
+
 const read_input = () => {
   const file = readFileSync("./p8-input.txt", "utf-8");
   const lines = file.split("\n");
@@ -33,9 +39,31 @@ const p1 = () => {
   return steps;
 };
 
+const p2 = () => {
+  let startNodes = Object.keys(network).filter((node) => node.endsWith("A"));
+  let steps = [];
+  for (let i = 0; i < startNodes.length; i++) {
+    let currentNode = startNodes[i];
+    let currentSteps = 0;
+    while (!currentNode.endsWith("Z")) {
+      for (let i = 0; i < instructions.length; i++) {
+        currentNode = network[currentNode][instructions[i]];
+        currentSteps++;
+        if (currentNode.endsWith("Z")) break;
+      }
+    }
+    steps.push(currentSteps);
+  }
+  return steps;
+};
+
 const main = () => {
   read_input();
   console.log("Steps required to reach ZZZ: ", p1());
+  console.log(
+    "Steps required to reach all nodes that end with Z: ",
+    lcmAll(p2())
+  );
 };
 
 main();
