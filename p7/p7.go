@@ -16,12 +16,28 @@ type Hand struct {
 }
 
 func (h Hand) FiveOfAKind() bool {
-	return strings.Count(h.Cards, string(h.Cards[0])) == 5
+	numJokers := strings.Count(h.Cards, "J")
+	if numJokers == 5 {
+		return true
+	}
+	for _, c := range h.Cards {
+		if c == 'J' {
+			continue
+		}
+		if strings.Count(h.Cards, string(c))+numJokers == 5 {
+			return true
+		}
+	}
+	return false
 }
 
 func (h Hand) FourOfAKind() bool {
+	numJokers := strings.Count(h.Cards, "J")
 	for _, c := range h.Cards {
-		if strings.Count(h.Cards, string(c)) == 4 {
+		if c == 'J' {
+			continue
+		}
+		if strings.Count(h.Cards, string(c))+numJokers == 4 {
 			return true
 		}
 	}
@@ -29,10 +45,30 @@ func (h Hand) FourOfAKind() bool {
 }
 
 func (h Hand) FullHouse() bool {
+	numJokers := strings.Count(h.Cards, "J")
+	if h.FourOfAKind() {
+		return true
+	}
+
 	for _, c := range h.Cards {
-		if strings.Count(h.Cards, string(c)) == 3 {
+		if c == 'J' {
+			continue
+		}
+		if strings.Count(h.Cards, string(c))+numJokers == 3 {
 			for _, d := range h.Cards {
+				if c == d || d == 'J' {
+					continue
+				}
 				if strings.Count(h.Cards, string(d)) == 2 {
+					return true
+				}
+			}
+		} else if strings.Count(h.Cards, string(c))+numJokers == 2 {
+			for _, d := range h.Cards {
+				if c == d || d == 'J' {
+					continue
+				}
+				if strings.Count(h.Cards, string(d)) == 3 {
 					return true
 				}
 			}
@@ -42,32 +78,53 @@ func (h Hand) FullHouse() bool {
 }
 
 func (h Hand) ThreeOfAKind() bool {
+	numJokers := strings.Count(h.Cards, "J")
 	for _, c := range h.Cards {
-		if strings.Count(h.Cards, string(c)) == 3 {
-			return !h.OnePair()
+		if c == 'J' {
+			continue
+		}
+		if strings.Count(h.Cards, string(c))+numJokers >= 3 {
+			return true
 		}
 	}
 	return false
 }
 
 func (h Hand) TwoPairs() bool {
-	pairs := 0
-	foundPairs := map[string]bool{}
+	numJokers := strings.Count(h.Cards, "J")
+	if numJokers >= 2 || h.ThreeOfAKind() {
+		return true
+	}
 	for _, c := range h.Cards {
-		if foundPairs[string(c)] {
-			continue
-		}
-		if strings.Count(h.Cards, string(c)) == 2 {
-			foundPairs[string(c)] = true
-			pairs++
+		if strings.Count(h.Cards, string(c)) >= 2 {
+			for _, d := range h.Cards {
+				if c == d || d == 'J' {
+					continue
+				}
+				if strings.Count(h.Cards, string(d))+numJokers >= 2 {
+					return true
+				}
+			}
+		} else if strings.Count(h.Cards, string(c))+numJokers >= 2 {
+			for _, d := range h.Cards {
+				if c == d || d == 'J' {
+					continue
+				}
+				if strings.Count(h.Cards, string(d)) >= 2 {
+					return true
+				}
+			}
 		}
 	}
-	return pairs == 2
+	return false
 }
 
 func (h Hand) OnePair() bool {
 	pairs := 0
 	foundPair1 := ""
+	if strings.Count(h.Cards, "J") >= 1 || h.TwoPairs() {
+		return true
+	}
 	for _, c := range h.Cards {
 		if string(c) == foundPair1 {
 			continue
@@ -115,12 +172,11 @@ func compareHands(a Hand, b Hand) bool {
 	} else if !a.OnePair() && b.OnePair() {
 		return false
 	}
-
 	royalCards := map[string]int{
 		"A": 14,
 		"K": 13,
 		"Q": 12,
-		"J": 11,
+		"J": 0, // Joker
 		"T": 10,
 	}
 	for i := 0; i < len(a.Cards); i++ {
@@ -180,5 +236,8 @@ func main() {
 		hands = append(hands, hand)
 	}
 	hands = sortHands(hands)
+	for i := 0; i < len(hands); i++ {
+		fmt.Printf("rank: %d: hand: %s bid: %d\n", i+1, hands[i].Cards, hands[i].Bid)
+	}
 	fmt.Printf("Total winnings: %d\n", calcTotalWinnings(hands))
 }
